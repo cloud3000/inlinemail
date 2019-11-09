@@ -18,5 +18,5 @@ Two files must be edited:
 ## At the command line
 
 ```bash
-./inlinemail -f from@example.com -t to.someone@example.com -s "The subject line" -v false
+./inlinemail -f from@example.com -t to.someone@example.com -s "The subject line"
 ```
