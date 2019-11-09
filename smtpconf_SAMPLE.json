@@ -1,0 +1,6 @@
+{
+  "smtpUser": "someone@example.com",
+  "smtpPass": "password",
+  "smtpServ": "mail.example.com",
+  "smtpPort": 587
+}
