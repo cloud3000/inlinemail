@@ -35,10 +35,6 @@ func getconf() (Smtpconf, error) {
 	return obj, err
 }
 
-var (
-	debug = flag.Bool("v", false, "Enable verbose debugging output")
-)
-
 func iEmail(mailfrom *string, mailto *string, mailsub *string, mailmsg *string) int {
 	conf, conferr := getconf()
 	if conferr != nil {
@@ -80,7 +76,6 @@ func iEmail(mailfrom *string, mailto *string, mailsub *string, mailmsg *string) 
 
 	email.SetFrom(*mailfrom).
 		AddTo(*mailto).
-		AddCc("a1.anderson@outlook.com").
 		SetSubject(*mailsub)
 
 	email.SetBody(mail.TextHTML, *mailmsg)
@@ -102,28 +97,29 @@ func main() {
 		inlineFrom    = flag.String("f", "", "FROM Email address")
 		inlineTo      = flag.String("t", "", "TO Email address")
 		inlineSubject = flag.String("s", "", "SUBJECT of Email")
-		inlineMsg     = flag.String("m", "", "Message body  ")
 	)
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage of %s: [flags] command [command args…]\n", os.Args[0])
-		flag.CommandLine.SetOutput(os.Stderr)
-		flag.PrintDefaults()
-	}
 	flag.Parse()
 
-	if flag.NArg() == 0 {
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of %s: [flags] command [command args…]\n", os.Args[0])
+		flag.PrintDefaults()
+	}
+
+	if len(*inlineSubject) == 0 || len(*inlineFrom) == 0 || len(*inlineTo) == 0 {
 		flag.Usage()
 		os.Exit(1)
 	}
 	syslog.Openlog("inlinemail", syslog.LOG_PID, syslog.LOG_USER)
 	syslog.Syslog(syslog.LOG_INFO, "inlinemail begin")
 
-	htmlBody, err := ioutil.ReadFile("./iemail.html")
+	htmlBody, err := ioutil.ReadFile("./inlinemail.html")
 	if err != nil {
-		fmt.Printf("Unable to open HTML templete ./iemail.html %s\n", err.Error())
+		fmt.Printf("Unable to open HTML templete ./inlinemail.html %s\n", err.Error())
+		os.Exit(1)
 	}
-	*inlineMsg = string(htmlBody)
-	iEmail(inlineFrom, inlineTo, inlineSubject, inlineMsg)
+
+	inlineMsg := string(htmlBody)
+	iEmail(inlineFrom, inlineTo, inlineSubject, &inlineMsg)
 	syslog.Syslog(syslog.LOG_INFO, "inlinemail end")
 	syslog.Closelog()
 
